@@ -17,6 +17,7 @@ select * from streams;
 CREATE TABLE courses (
     course_id INT AUTO_INCREMENT PRIMARY KEY,
     course_name VARCHAR(100) NOT NULL,
+    stream_id INT,
     FOREIGN KEY (stream_id) REFERENCES streams(id)
 );
 
@@ -143,7 +144,7 @@ CREATE TABLE class_subjects (
     FOREIGN KEY (subject_id) REFERENCES subjects(subject_id)
 );
 
---This has to be done manually in Database, but we have to make it dynamically for the admin.
+-- This has to be done manually in Database, but we have to make it dynamically for the admin.
 insert into class_subjects(class_id, subject_id) values (6,1),(6,2),(6,3),(6,4),(6,5),(6,6),(6,7),(6,8),(6,9),(6,10),(6,11);
 
 desc class_subjects;
@@ -176,18 +177,100 @@ select * from teachers;
 CREATE TABLE teacher_subjects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     teacher_id INT NOT NULL,
-    subject_id VARCHAR(255) NOT NULL,
+    subject_id INT NOT NULL, -- Changed to INT to match the subjects table
     class_id INT NOT NULL,
     teaching_type ENUM('Theory', 'Practical') NOT NULL DEFAULT 'Theory',
     FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id) ON DELETE CASCADE,
-    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE, 
     FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE CASCADE
 );
 
-insert into teacher_subjects (id, teacher_id, subject_id, class_id, teaching_type) values (1, 1, 1, 6, 'Theory'), (2, 1, 2, 6, 'Practical'), (3, 2, 2, 6, 'Practical'), (4, 3, 3, 6, 'Theory'), (5, 3, 4, 6, 'Practical'), (6, 4, 5, 6, 'Theory'), (7, 5, 6, 6, 'Theory'), (8, 5, 7, 6, 'Practical'), (9, 6, 8, 6, 'Theory'), (10, 6, 9, 6, 'Practical'), (11, 7, 10, 6, 'Theory'), (12, 7, 11, 6, 'Practical');
+insert into teacher_subjects (teacher_id, subject_id, class_id, teaching_type) values 
+(1, 1, 6, 'Theory'), 
+(1, 2, 6, 'Practical'), 
+(2, 2, 6, 'Practical'), 
+(3, 3, 6, 'Theory'),
+(3, 4, 6, 'Practical'), 
+(4, 5, 6, 'Theory'), 
+(5, 6, 6, 'Theory'), 
+(5, 7, 6, 'Practical'), 
+(6, 8, 6, 'Theory'), 
+(6, 9, 6, 'Practical'), 
+(7, 10, 6, 'Theory'), 
+(7, 11, 6, 'Practical');
 
 desc teacher_subjects;
 select * from teacher_subjects;
+
+CREATE TABLE subjects_cs (
+    subject_id INT AUTO_INCREMENT PRIMARY KEY,
+    subject_name VARCHAR(100) NOT NULL
+); 
+INSERT INTO subjects_cs (subject_name) 
+VALUES 
+('Artificial Intelligence'), 
+('Artificial Intelligence Practical'), 
+('Information and Cybersecurity'), 
+('Information and Cybersecurity Practical'), 
+('Linux Server Administration'), 
+('Linux Server Administration Practical'), 
+('Science of Language Processing'), 
+('Statistical Methods'), 
+('Statistical Methods Practical'); 
+
+select * from subjects_cs; 
+
+CREATE TABLE class_subjects_cs (
+    class_id INT NOT NULL, 
+    subject_id INT NOT NULL, 
+    PRIMARY KEY (class_id, subject_id), 
+    FOREIGN KEY (class_id) REFERENCES classes(class_id), 
+    FOREIGN KEY (subject_id) REFERENCES subjects_cs(subject_id)
+); 
+
+insert into class_subjects_cs(class_id, subject_id) 
+values 
+(9,1), (9,2), (9,3), (9,4), (9,5), (9,6), (9,7), (9,8), (9,9);
+
+CREATE TABLE teachers_cs(
+    teacher_id INT AUTO_INCREMENT PRIMARY KEY, 
+    name VARCHAR(100) NOT NULL
+); 
+
+INSERT INTO teachers_cs (teacher_id, name) 
+VALUES 
+(1, 'Dr. Sheeja K'), 
+(2, 'Dr. Aditya Jinturkar'), 
+(3, 'Dr. Rajeshri Shinkar'), 
+(4, 'Dr. Pallavi Awate'), 
+(5, 'Ms. Flosia Simon'), 
+(6, 'Ms. Fatema Kothari'), 
+(7, 'Dr. Trupti Wani'),
+(8, 'Ms. Shrutika Jadhav'),
+(9, 'Ms. Dipti Patil'); 
+
+CREATE TABLE teacher_subjects_cs(
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+    teacher_id INT NOT NULL, 
+    subject_id INT NOT NULL,
+    class_id INT NOT NULL, 
+    teaching_type ENUM('Theory', 'Practical') NOT NULL DEFAULT 'Theory', 
+    FOREIGN KEY (teacher_id) REFERENCES teachers_cs(teacher_id) ON DELETE CASCADE, 
+    FOREIGN KEY (subject_id) REFERENCES subjects_cs(subject_id) ON DELETE CASCADE, 
+    FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE CASCADE
+); 
+
+insert into teacher_subjects_cs(id, teacher_id, subject_id, class_id, teaching_type) 
+values 
+(1, 3, 1, 9, 'Theory'), 
+(2, 3, 2, 9, 'Practical'), 
+(3, 6, 3, 9, 'Theory'), 
+(4, 6, 4, 9, 'Practical'), 
+(5, 2, 5, 9, 'Theory'), 
+(6, 2, 6, 9, 'Practical'), 
+(7, 5, 7, 9, 'Theory'), 
+(8, 1, 8, 9, 'Theory'), 
+(9, 1, 9, 9, 'Practical');
 
 CREATE TABLE eligibility (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -198,6 +281,16 @@ CREATE TABLE eligibility (
 
 desc eligibility;
 select * from eligibility;
+
+CREATE TABLE questions (
+    question_id INT AUTO_INCREMENT PRIMARY KEY,
+    question_text VARCHAR(255) NOT NULL,
+    class_id INT, -- optional (if some questions differ by class)
+    FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE CASCADE
+);
+
+desc questions;
+select * from questions;
 
 CREATE TABLE feedback (
     feedback_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -213,22 +306,14 @@ CREATE TABLE feedback (
 desc feedback;
 select * from feedback;
 
-CREATE TABLE questions (
-    question_id INT AUTO_INCREMENT PRIMARY KEY,
-    question_text VARCHAR(255) NOT NULL,
-    class_id INT, -- optional (if some questions differ by class)
-    FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE CASCADE
-);
-
-desc questions;
-select * from questions;
 
 create table admins (
-	admin_id int auto_increment primary key,
+    admin_id int auto_increment primary key,
     admin_name varchar(100) not null,
     admin_password varchar(255) not null,
     admin_email varchar(255) not null
 );
+
 desc admins;
 select * from admins;
 
