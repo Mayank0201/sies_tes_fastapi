@@ -1,11 +1,13 @@
 import os
 from dotenv import load_dotenv
 from databases import Database
+from pathlib import Path
 
-# Load environment variables from .env
-load_dotenv()
+# Explicitly specify path to the .env file
+from pathlib import Path
+env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
-# Build DATABASE_URL from env variables
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST", "localhost")
