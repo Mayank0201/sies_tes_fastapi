@@ -1,5 +1,5 @@
-CREATE DATABASE sies_tes;
-USE sies_tes;
+CREATE DATABASE sies_tes2;
+USE sies_tes2;
 
 CREATE TABLE streams (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -181,11 +181,8 @@ CREATE TABLE teacher_subjects (
     class_id INT NOT NULL,
     teaching_type ENUM('Theory', 'Practical') NOT NULL DEFAULT 'Theory',
     FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id) ON DELETE CASCADE,
-<<<<<<< HEAD
     FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE, -- Foreign key reference to subjects table
-=======
     FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE, 
->>>>>>> f1cb394c8f114e0e52727ad1aeab2e149eae9b3b
     FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE CASCADE
 );
 
@@ -256,11 +253,7 @@ VALUES
 CREATE TABLE teacher_subjects_cs(
     id INT AUTO_INCREMENT PRIMARY KEY, 
     teacher_id INT NOT NULL, 
-<<<<<<< HEAD
-    subject_id INT NOT NULL, -- Changed to INT to match the subjects_cs table
-=======
     subject_id INT NOT NULL,
->>>>>>> f1cb394c8f114e0e52727ad1aeab2e149eae9b3b
     class_id INT NOT NULL, 
     teaching_type ENUM('Theory', 'Practical') NOT NULL DEFAULT 'Theory', 
     FOREIGN KEY (teacher_id) REFERENCES teachers_cs(teacher_id) ON DELETE CASCADE, 
@@ -306,14 +299,15 @@ CREATE TABLE feedback (
     teacher_subject_id INT NOT NULL,
     question_id INT NOT NULL,
     rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
     FOREIGN KEY (teacher_subject_id) REFERENCES teacher_subjects(id) ON DELETE CASCADE,
     FOREIGN KEY (question_id) REFERENCES questions(question_id) ON DELETE CASCADE
 );
 
+
 desc feedback;
 select * from feedback;
-
 
 create table admins (
     admin_id int auto_increment primary key,

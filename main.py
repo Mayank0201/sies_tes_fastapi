@@ -1,3 +1,5 @@
+# app/main.py
+
 from fastapi import FastAPI
 from app.database import database
 from fastapi.templating import Jinja2Templates
@@ -11,17 +13,13 @@ from app.routes import students
 from app.routes import admin
 from app.routes import feedback
 
-async def lifespan(app: FastAPI):
-    await database.connect()
-    yield
-    await database.disconnect()
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
+# Add session middleware (use a strong secret key)
 app.add_middleware(SessionMiddleware, secret_key="VinodKamrajAcharya")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
 templates = Jinja2Templates(directory="app/templates")
 
 @app.get("/student/register-form")
@@ -51,6 +49,17 @@ def student_login_form(request: Request):
 @app.get("/admin/login-form")
 def admin_login_form(request: Request):
     return templates.TemplateResponse("adminLogin.html", {"request": request})
+
+
+
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
+
 
 app.include_router(students.router)
 app.include_router(admin.router)
