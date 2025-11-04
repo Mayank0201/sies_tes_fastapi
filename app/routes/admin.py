@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from app.database import database
 import bcrypt
@@ -132,17 +132,43 @@ async def admin_students(request: Request):
 # ---------------------------
 # Manage Teachers Page
 # ---------------------------
+
 @router.get("/admin/manage-teachers", response_class=HTMLResponse)
 async def admin_teachers(request: Request):
     admin = await get_logged_in_admin(request)
     if not admin:
         return RedirectResponse(url="/admin/login-form", status_code=302)
 
+    query = "SELECT * FROM teachers"
+    teachers = await database.fetch_all(query)
+
     return templates.TemplateResponse(
         "adminTeachers.html",
-        {"request": request, "admin": admin, "active_page": "teachers"}
+        {
+            "request": request,
+            "admin": admin,
+            "teachers": teachers,
+            "active_page": "teachers"
+        }
     )
 
+@router.post("/admin/add-teacher")
+async def add_teacher(name: str = Form(...)):
+    query = "INSERT INTO teachers (name) VALUES (:name)"
+    await database.execute(query, {"name": name})
+    return JSONResponse(content={"message": "Teacher added successfully"})
+
+@router.delete("/admin/delete-teacher/{teacher_id}")
+async def delete_teacher(teacher_id: int):
+    query = "DELETE FROM teachers WHERE teacher_id = :teacher_id"
+    await database.execute(query, {"teacher_id": teacher_id})
+    return JSONResponse(content={"message": "Teacher deleted successfully"})
+
+@router.post("/admin/update-teacher")
+async def update_teacher(teacher_id: int = Form(...), name: str = Form(...)):
+    query = "UPDATE teachers SET name = :name WHERE teacher_id = :teacher_id"
+    await database.execute(query, {"teacher_id": teacher_id, "name": name})
+    return JSONResponse(content={"message": "Teacher updated successfully"})
 
 # ---------------------------
 # Admin Logout
