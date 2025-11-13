@@ -372,6 +372,63 @@ body {
     .header p {
         font-size: 0.875rem;
     }
+
+        #pending-modules-list {
+        font-size: 1.25rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .pending-card {
+        background: linear-gradient(180deg, #fff 0%, #ffecec 100%);
+        border: 1px solid #fca5a5;
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .pending-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+
+    .pending-card h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 4px;
+    }
+
+    .pending-card p {
+        font-size: 0.85rem;
+        color: #555;
+        margin-bottom: 10px;
+    }
+
+    .pending-card .status {
+        color: #dc2626;
+        font-weight: 600;
+        margin: 8px 0;
+        font-size: 0.85rem;
+    }
+
+    .pending-card a {
+        display: inline-block;
+        background-color: #ef4444;
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 8px 0;
+        border-radius: 8px;
+        width: 100%;
+        transition: background-color 0.2s ease;
+    }
+
+    .pending-card a:hover {
+        background-color: #dc2626;
+    }
 }
 
 /* VERY SMALL SCREENS ≤450px */

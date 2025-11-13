@@ -12,7 +12,8 @@ body {
     padding: 40px;
     background: #fff;
     min-height: 100vh;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
 }
 
 h2.welcome {
@@ -22,7 +23,7 @@ h2.welcome {
 }
 
 /* Buttons */
-button {
+button, .add-btn {
     background: #6a5acd;
     color: white;
     border: none;
@@ -35,7 +36,7 @@ button {
     margin-bottom: 20px;
 }
 
-button:hover {
+button:hover, .add-btn:hover {
     background: #5941c0;
     transform: translateY(-2px);
 }
@@ -76,7 +77,6 @@ a {
     text-decoration: none;
     font-weight: 500;
     margin: 0 6px;
-    cursor: pointer;
 }
 
 a:hover {
@@ -91,9 +91,20 @@ a.delete {
     color: #d9534f;
 }
 
+/* Eligibility classes */
+.eligible {
+    color: green;
+    font-weight: 600;
+}
+
+.not-eligible {
+    color: red;
+    font-weight: 600;
+}
+
 /* Modal styling */
 .modal {
-    display: none; /* hidden by default */
+    display: none;
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -110,8 +121,9 @@ a.delete {
     background: #fff;
     padding: 30px;
     border-radius: 12px;
-    width: 350px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
@@ -126,12 +138,13 @@ a.delete {
     gap: 14px;
 }
 
-.modal-content input,
-.modal-content select {
+.modal-content input, .modal-content select {
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .modal-actions {
@@ -143,4 +156,43 @@ a.delete {
 .modal-actions button {
     flex: 1;
     margin: 5px;
+}
+
+.modal-actions button[type="submit"] {
+    background: #6a5acd;
+    color: white;
+    font-weight: 600;
+}
+
+.modal-actions button[type="button"] {
+    background: #d9534f;
+    color: white;
+    font-weight: 600;
+}
+
+/* Close Button */
+.close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #d9534f;
+    font-weight: bold;
+}
+
+/* Responsive */
+@media(max-width: 500px){
+    .modal-content {
+        width: 90%;
+        padding: 20px;
+    }
+
+    table, th, td {
+        font-size: 14px;
+    }
+
+    h2.welcome {
+        font-size: 22px;
+    }
 }
