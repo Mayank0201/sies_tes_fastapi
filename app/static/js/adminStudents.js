@@ -1,50 +1,47 @@
-// Toggle Eligibility
-async function updateEligibility(studentId, newStatus) {
-  const formData = new FormData();
-  formData.append("student_id", studentId);
-  formData.append("is_eligible", newStatus);
-
-  const response = await fetch("/admin/update-eligibility", { method: "POST", body: formData });
-  if (response.ok) location.reload();
-  else alert("Failed to update eligibility.");
+function openModal(id) {
+  document.getElementById(id).style.display = 'flex';
 }
 
-// Delete Student
-async function deleteStudent(studentId) {
-  if (!confirm("Are you sure you want to delete this student?")) return;
-  const response = await fetch(`/admin/delete-student/${studentId}`, { method: "DELETE" });
-  if (response.ok) location.reload();
-  else alert("Failed to delete student.");
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
 }
 
-// Open/Close Modal
-function openModal(id) { document.getElementById(id).style.display = "flex"; }
-function closeModal(id) { document.getElementById(id).style.display = "none"; }
-
-// Open Update Modal with Prefilled Data
-function openUpdateModal(id, name, roll, classId, year) {
-  document.getElementById("update_student_id").value = id;
-  document.getElementById("update_name").value = name;
-  document.getElementById("update_roll_no").value = roll;
-  document.getElementById("update_class_id").value = classId;
-  document.getElementById("update_year").value = year;
-  openModal("updateModal");
+function openUpdateModal(id, name, roll, classId, year, courseId, eligible) {
+  document.getElementById('update_student_id').value = id;
+  document.getElementById('update_name').value = name;
+  document.getElementById('update_roll_no').value = roll;
+  document.getElementById('update_class_id').value = classId;
+  document.getElementById('update_admission_year').value = year;
+  document.getElementById('update_course_id').value = courseId;
+  document.getElementById('update_is_eligible').value = eligible;
+  openModal('updateModal');
 }
 
-// Handle Add Form
-document.getElementById("addForm").onsubmit = async function(e) {
+function openDeleteModal(id, name) {
+  document.getElementById('deleteStudentName').innerText = `Delete "${name}"?`;
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.onclick = async function () {
+    const response = await fetch(`/admin/delete-student/${id}`, { method: 'DELETE' });
+    if (response.ok) location.reload();
+    else alert('Failed to delete student.');
+  };
+  openModal('deleteModal');
+}
+
+// Add student
+document.getElementById('addForm').onsubmit = async function(e) {
   e.preventDefault();
   const formData = new FormData(this);
-  const response = await fetch("/admin/add-student", { method: "POST", body: formData });
-  if (response.ok) location.reload();
-  else alert("Failed to add student.");
+  const res = await fetch('/admin/add-student', { method: 'POST', body: formData });
+  if (res.ok) location.reload();
+  else alert('Failed to add student.');
 };
 
-// Handle Update Form
-document.getElementById("updateForm").onsubmit = async function(e) {
+// Update student
+document.getElementById('updateForm').onsubmit = async function(e) {
   e.preventDefault();
   const formData = new FormData(this);
-  const response = await fetch("/admin/update-student", { method: "POST", body: formData });
-  if (response.ok) location.reload();
-  else alert("Failed to update student.");
+  const res = await fetch('/admin/update-student', { method: 'POST', body: formData });
+  if (res.ok) location.reload();
+  else alert('Failed to update student.');
 };

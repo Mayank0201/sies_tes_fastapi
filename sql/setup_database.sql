@@ -1,5 +1,5 @@
-CREATE DATABASE sies_tes2;
-USE sies_tes2;
+CREATE DATABASE sies_tes;
+USE sies_tes;
 
 CREATE TABLE streams (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -159,13 +159,16 @@ CREATE TABLE students (
     admission_year INT NOT NULL,
     FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE SET NULL
 );
+ALTER TABLE students
+ADD COLUMN course_id VARCHAR(50) NULL,
+ADD COLUMN is_eligible TINYINT(1) DEFAULT 1;
 
 desc students;
 select * from students;
 
 CREATE TABLE teachers (
     teacher_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    name VARCHAR(100) UNIQUE NOT NULL
 );
 
 INSERT INTO teachers (teacher_id, name)
@@ -177,7 +180,7 @@ select * from teachers;
 CREATE TABLE teacher_subjects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     teacher_id INT NOT NULL,
-    subject_id INT NOT NULL, -- Changed to INT to match the subjects table
+    subject_id INT NOT NULL, 
     class_id INT NOT NULL,
     teaching_type ENUM('Theory', 'Practical') NOT NULL DEFAULT 'Theory',
     FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id) ON DELETE CASCADE,
@@ -235,7 +238,7 @@ values
 
 CREATE TABLE teachers_cs(
     teacher_id INT AUTO_INCREMENT PRIMARY KEY, 
-    name VARCHAR(100) NOT NULL
+    name VARCHAR(100) UNIQUE NOT NULL
 ); 
 
 INSERT INTO teachers_cs (teacher_id, name) 

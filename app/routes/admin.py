@@ -108,13 +108,16 @@ async def admin_dashboard(request: Request):
 # ---------------------------
 # Manage Students Page
 # ---------------------------
+# ---------------------------
+# Manage Students Page
+# ---------------------------
+
 @router.get("/admin/manage-students", response_class=HTMLResponse)
 async def admin_students(request: Request):
     admin = await get_logged_in_admin(request)
     if not admin:
         return RedirectResponse(url="/admin/login-form", status_code=302)
 
-    # Fetch all students
     query = "SELECT * FROM students"
     students = await database.fetch_all(query)
 
@@ -128,6 +131,71 @@ async def admin_students(request: Request):
         }
     )
 
+# Add Student
+@router.post("/admin/add-student")
+async def add_student(
+    name: str = Form(...),
+    roll_no: str = Form(...),
+    class_id: int = Form(...),
+    admission_year: int = Form(...),
+    course_id: str = Form(...),
+    is_eligible: int = Form(...)
+):
+    query = """
+        INSERT INTO students (name, roll_no, class_id, admission_year, course_id, is_eligible, password)
+        VALUES (:name, :roll_no, :class_id, :admission_year, :course_id, :is_eligible, :password)
+    """
+    values = {
+        "name": name,
+        "roll_no": roll_no,
+        "class_id": class_id,
+        "admission_year": admission_year,
+        "course_id": course_id,
+        "is_eligible": is_eligible,
+        "password": "123456"
+    }
+    await database.execute(query, values)
+    return JSONResponse(content={"message": "Student added successfully"})
+
+
+@router.post("/admin/update-student")
+async def update_student(
+    student_id: int = Form(...),
+    name: str = Form(...),
+    roll_no: str = Form(...),
+    class_id: int = Form(...),
+    admission_year: int = Form(...),
+    course_id: str = Form(...),
+    is_eligible: int = Form(...)
+):
+    query = """
+        UPDATE students
+        SET name = :name,
+            roll_no = :roll_no,
+            class_id = :class_id,
+            admission_year = :admission_year,
+            course_id = :course_id,
+            is_eligible = :is_eligible,
+            password = "123456"
+        WHERE student_id = :student_id
+    """
+    values = {
+        "student_id": student_id,
+        "name": name,
+        "roll_no": roll_no,
+        "class_id": class_id,
+        "admission_year": admission_year,
+        "course_id": course_id,
+        "is_eligible": is_eligible,
+    }
+    await database.execute(query, values)
+    return JSONResponse(content={"message": "Student updated successfully"})
+
+@router.delete("/admin/delete-student/{student_id}")
+async def delete_student(student_id: int):
+    query = "DELETE FROM students WHERE student_id = :student_id"
+    await database.execute(query, {"student_id": student_id})
+    return JSONResponse(content={"message": "Student deleted successfully"})
 
 # ---------------------------
 # Manage Teachers Page
@@ -139,7 +207,7 @@ async def admin_teachers(request: Request):
     if not admin:
         return RedirectResponse(url="/admin/login-form", status_code=302)
 
-    query = "SELECT * FROM teachers"
+    query = "SELECT * FROM teachers order by teacher_id"
     teachers = await database.fetch_all(query)
 
     return templates.TemplateResponse(
