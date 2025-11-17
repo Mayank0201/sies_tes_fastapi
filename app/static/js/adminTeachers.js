@@ -16,42 +16,64 @@ function openUpdateModal(id, name) {
 
 function openDeleteModal(id, name) {
   teacherToDelete = id;
-  document.getElementById("deleteTeacherName").textContent = `Are you sure you want to delete "${name}"?`;
+  document.getElementById(
+    "deleteTeacherName"
+  ).textContent = `Are you sure you want to delete "${name}"?`;
   openModal("deleteModal");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   // Attach delete buttons
-  document.querySelectorAll("a.delete").forEach(btn => {
+  document.querySelectorAll("a.delete").forEach((btn) => {
     btn.addEventListener("click", () => {
       openDeleteModal(btn.dataset.id, btn.dataset.name);
     });
   });
 
   // Confirm delete
-  document.getElementById("confirmDeleteBtn").addEventListener("click", async () => {
-    if (!teacherToDelete) return;
-    const response = await fetch(`/admin/delete-teacher/${teacherToDelete}`, { method: "DELETE" });
-    closeModal("deleteModal");
-    teacherToDelete = null;
-    if (response.ok) location.reload();
-    else alert("Failed to delete teacher.");
-  });
+  document
+    .getElementById("confirmDeleteBtn")
+    .addEventListener("click", async () => {
+      if (!teacherToDelete) return;
+
+      const response = await fetch(`/admin/delete-teacher/${teacherToDelete}`, {
+        method: "DELETE",
+      });
+
+      closeModal("deleteModal");
+      teacherToDelete = null;
+
+      if (response.ok) location.reload();
+      else alert("Failed to delete teacher.");
+    });
 
   // Add teacher
-  document.getElementById("addForm").onsubmit = async function(e) {
+  document.getElementById("addForm").onsubmit = async function (e) {
     e.preventDefault();
     const formData = new FormData(this);
-    const response = await fetch("/admin/add-teacher", { method: "POST", body: formData });
+
+    // Add course_id dynamically if needed, e.g., from admin
+    // formData.append("course_id", ADMIN_COURSE_ID);
+
+    const response = await fetch("/admin/add-teacher", {
+      method: "POST",
+      body: formData,
+    });
+
     if (response.ok) location.reload();
     else alert("Failed to add teacher.");
   };
 
   // Update teacher
-  document.getElementById("updateForm").onsubmit = async function(e) {
+  document.getElementById("updateForm").onsubmit = async function (e) {
     e.preventDefault();
     const formData = new FormData(this);
-    const response = await fetch("/admin/update-teacher", { method: "POST", body: formData });
+
+    const response = await fetch("/admin/update-teacher", {
+      method: "POST",
+      body: formData,
+    });
+
     if (response.ok) location.reload();
     else alert("Failed to update teacher.");
   };

@@ -1,101 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Manage Students</title>
-  <link rel="stylesheet" href="/static/css/adminDashboard.css">
-  <link rel="stylesheet" href="/static/css/adminStudents.css">
-  <script src="/static/js/adminStudents.js" defer></script>
-</head>
-<body>
-  {% include 'adminSidebar.html' %}
+  <head>
+    <meta charset="UTF-8" />
+    <title>Manage Students</title>
+    <link rel="stylesheet" href="/static/css/adminDashboard.css" />
+    <link rel="stylesheet" href="/static/css/adminStudents.css" />
+    <script src="/static/js/adminStudents.js" defer></script>
+  </head>
+  <body>
+    {% include 'adminSidebar.html' %}
 
-  <main class="main-content">
-    <h2 class="welcome">Manage Students</h2>
-    <button type="button" onclick="openModal('addModal')">Add New Student</button>
+    <main class="main-content">
+      <h2 class="welcome">Manage Students</h2>
+      <button type="button" onclick="openModal('addModal')">
+        Add New Student
+      </button>
 
-    <table border="1" cellpadding="8" cellspacing="0">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Roll No</th>
-          <th>Class ID</th>
-          <th>Admission Year</th>
-          <th>Course ID</th>
-          <th>Eligible</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for s in students %}
-        <tr>
-          <td>{{ s.student_id }}</td>
-          <td>{{ s.name }}</td>
-          <td>{{ s.roll_no }}</td>
-          <td>{{ s.class_id }}</td>
-          <td>{{ s.admission_year }}</td>
-          <td>{{ s.course_id }}</td>
-          <td>{{ s.is_eligible }}</td>
-          <td>
-            <a href="javascript:void(0)" onclick="openUpdateModal('{{ s.student_id }}','{{ s.name }}','{{ s.roll_no }}','{{ s.class_id }}','{{ s.admission_year }}','{{ s.course_id }}','{{ s.is_eligible }}')">Edit</a> |
-            <a href="javascript:void(0)" onclick="openDeleteModal('{{ s.student_id }}','{{ s.name }}')">Delete</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </main>
+      <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Roll No</th>
+            <th>Class ID</th>
+            <th>Admission Year</th>
+            <th>Course ID</th>
+            <th>Eligible</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in students %}
+          <tr>
+            <td>{{ s.student_id }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.roll_no }}</td>
+            <td>{{ s.class_id }}</td>
+            <td>{{ s.admission_year }}</td>
+            <td>{{ s.course_id }}</td>
+            <td>{{ s.is_eligible }}</td>
+            <td>
+              <a
+                href="javascript:void(0)"
+                onclick="openUpdateModal('{{ s.student_id }}','{{ s.name }}','{{ s.roll_no }}','{{ s.class_id }}','{{ s.admission_year }}','{{ s.course_id }}','{{ s.is_eligible }}')"
+                >Edit</a
+              >
+              |
+              <a
+                href="javascript:void(0)"
+                onclick="openDeleteModal('{{ s.student_id }}','{{ s.name }}')"
+                >Delete</a
+              >
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </main>
 
-  <!-- Add Modal -->
-  <div id="addModal" class="modal">
-    <div class="modal-content">
-      <h3>Add Student</h3>
-      <form id="addForm">
-        <label>Name:</label><input type="text" name="name" required>
-        <label>Roll No:</label><input type="text" name="roll_no" required>
-        <label>Class ID:</label><input type="number" name="class_id" required>
-        <label>Admission Year:</label><input type="number" name="admission_year" required>
-        <label>Course ID:</label><input type="text" name="course_id" required>
-        <label>Is Eligible (1/0):</label><input type="number" name="is_eligible" required>
-        <div class="modal-actions">
-          <button type="submit">Add</button>
-          <button type="button" onclick="closeModal('addModal')">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Update Modal -->
-  <div id="updateModal" class="modal">
-    <div class="modal-content">
-      <h3>Update Student</h3>
-      <form id="updateForm">
-        <input type="hidden" name="student_id" id="update_student_id">
-        <label>Name:</label><input type="text" name="name" id="update_name" required>
-        <label>Roll No:</label><input type="text" name="roll_no" id="update_roll_no" required>
-        <label>Class ID:</label><input type="number" name="class_id" id="update_class_id" required>
-        <label>Admission Year:</label><input type="number" name="admission_year" id="update_admission_year" required>
-        <label>Course ID:</label><input type="text" name="course_id" id="update_course_id" required>
-        <label>Is Eligible (1/0):</label><input type="number" name="is_eligible" id="update_is_eligible" required>
-        <div class="modal-actions">
-          <button type="submit">Update</button>
-          <button type="button" onclick="closeModal('updateModal')">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Delete Modal -->
-  <div id="deleteModal" class="modal">
-    <div class="modal-content">
-      <h3>Delete Student</h3>
-      <p id="deleteStudentName"></p>
-      <div class="modal-actions">
-        <button id="confirmDeleteBtn" style="background:#d9534f;">Yes, Delete</button>
-        <button type="button" onclick="closeModal('deleteModal')">Cancel</button>
+    <!-- Add Modal -->
+    <div id="addModal" class="modal">
+      <div class="modal-content">
+        <h3>Add Student</h3>
+        <form id="addForm">
+          <label>Name:</label><input type="text" name="name" required />
+          <label>Roll No:</label><input type="text" name="roll_no" required />
+          <label>Class ID:</label
+          ><input type="number" name="class_id" required />
+          <label>Admission Year:</label
+          ><input type="number" name="admission_year" required />
+          <label>Course ID:</label
+          ><input type="text" name="course_id" required />
+          <label>Is Eligible (1/0):</label
+          ><input type="number" name="is_eligible" required />
+          <div class="modal-actions">
+            <button type="submit">Add</button>
+            <button type="button" onclick="closeModal('addModal')">
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>
-  </div>
-</body>
+
+    <!-- Update Modal -->
+    <div id="updateModal" class="modal">
+      <div class="modal-content">
+        <h3>Update Student</h3>
+        <form id="updateForm">
+          <input type="hidden" name="student_id" id="update_student_id" />
+          <label>Name:</label
+          ><input type="text" name="name" id="update_name" required />
+          <label>Roll No:</label
+          ><input type="text" name="roll_no" id="update_roll_no" required />
+          <label>Class ID:</label
+          ><input type="number" name="class_id" id="update_class_id" required />
+          <label>Admission Year:</label
+          ><input
+            type="number"
+            name="admission_year"
+            id="update_admission_year"
+            required
+          />
+          <label>Course ID:</label
+          ><input type="text" name="course_id" id="update_course_id" required />
+          <label>Is Eligible (1/0):</label
+          ><input
+            type="number"
+            name="is_eligible"
+            id="update_is_eligible"
+            required
+          />
+          <div class="modal-actions">
+            <button type="submit">Update</button>
+            <button type="button" onclick="closeModal('updateModal')">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="modal">
+      <div class="modal-content">
+        <h3>Delete Student</h3>
+        <p id="deleteStudentName"></p>
+        <div class="modal-actions">
+          <button id="confirmDeleteBtn" style="background: #d9534f">
+            Yes, Delete
+          </button>
+          <button type="button" onclick="closeModal('deleteModal')">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
