@@ -8,6 +8,7 @@ import bcrypt
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
+# ------------------ Student Registration ------------------
 @router.post("/studentRegister")
 async def register_student(
     name: str = Form(...),
@@ -30,6 +31,7 @@ async def register_student(
     })
     return RedirectResponse(url="/student/login-form", status_code=302)
 
+# ------------------ Student Login ------------------
 @router.post("/studentLogin")
 async def login_student(request: Request, roll_number: str = Form(...), password: str = Form(...)):
     query = students.select().where(students.c.roll_no == roll_number)
@@ -42,6 +44,7 @@ async def login_student(request: Request, roll_number: str = Form(...), password
         "error": "Incorrect roll number or password"
     })
 
+# ------------------ SQL Queries ------------------
 SQL_CLASS_AVERAGES = """
 SELECT
     s.subject_name,
@@ -81,14 +84,18 @@ ORDER BY
 LIMIT 5;
 """
 
+# ------------------ Student Dashboard ------------------
 @router.get("/studentDashboard", response_class=HTMLResponse)
 async def show_dashboard(request: Request):
     student_id = request.session.get("student_id")
     if not student_id:
         return RedirectResponse(url="/login", status_code=302)
+
     student_query = "SELECT * FROM students WHERE student_id = :student_id"
     student = await database.fetch_one(student_query, values={"student_id": student_id})
     class_id = student["class_id"]
+
+    # Updated modules query (no class_subjects)
     modules_query = """
         SELECT ts.id AS teacher_subject_id, s.subject_name, t.name AS teacher_name,
                EXISTS(
@@ -100,25 +107,17 @@ async def show_dashboard(request: Request):
         FROM teacher_subjects ts
         INNER JOIN subjects s ON ts.subject_id = s.subject_id
         INNER JOIN teachers t ON ts.teacher_id = t.teacher_id
-        INNER JOIN class_subjects cs ON cs.subject_id = ts.subject_id
-        WHERE cs.class_id = :class_id
+        WHERE ts.class_id = :class_id
         ORDER BY s.subject_name
     """
     modules = await database.fetch_all(
         modules_query,
-        values={
-            "student_id": student_id,
-            "class_id": class_id
-        }
+        values={"student_id": student_id, "class_id": class_id}
     )
-    class_ratings = await database.fetch_all(
-        SQL_CLASS_AVERAGES,
-        values={"class_id": class_id}
-    )
-    student_activity = await database.fetch_all(
-        SQL_STUDENT_ACTIVITY,
-        values={"student_id": student_id}
-    )
+
+    class_ratings = await database.fetch_all(SQL_CLASS_AVERAGES, values={"class_id": class_id})
+    student_activity = await database.fetch_all(SQL_STUDENT_ACTIVITY, values={"student_id": student_id})
+
     return templates.TemplateResponse("studentDashboard.html", {
         "request": request,
         "student": student,
@@ -127,24 +126,27 @@ async def show_dashboard(request: Request):
         "student_activity": student_activity
     })
 
+# ------------------ Module Rating ------------------
 @router.get("/module-rating", response_class=HTMLResponse)
 async def module_rating(request: Request):
     student_id = request.session.get("student_id")
     if not student_id:
         return RedirectResponse(url="/login", status_code=302)
+
     student_query = "SELECT * FROM students WHERE student_id = :student_id"
     student = await database.fetch_one(student_query, values={"student_id": student_id})
     class_id = student["class_id"]
+
     modules_query = """
         SELECT ts.id AS teacher_subject_id, s.subject_name, t.name AS teacher_name
         FROM teacher_subjects ts
         INNER JOIN subjects s ON ts.subject_id = s.subject_id
         INNER JOIN teachers t ON ts.teacher_id = t.teacher_id
-        INNER JOIN class_subjects cs ON cs.subject_id = ts.subject_id
-        WHERE cs.class_id = :class_id
+        WHERE ts.class_id = :class_id
         ORDER BY s.subject_name
     """
     modules = await database.fetch_all(modules_query, values={"class_id": class_id})
+
     updated_modules = []
     for module in modules:
         module_dict = dict(module)
@@ -160,33 +162,38 @@ async def module_rating(request: Request):
         })
         module_dict["student_avg_rating"] = round(result["student_avg"] if result and result["student_avg"] else 0, 1)
         updated_modules.append(module_dict)
+
     return templates.TemplateResponse("studentModuleRating.html", {
         "request": request,
         "student": student,
         "modules": updated_modules
     })
 
+# ------------------ Rate Subject ------------------
 @router.get("/rate/{teacher_subject_id}", response_class=HTMLResponse)
 async def rate_subject(request: Request, teacher_subject_id: int):
     student_id = request.session.get("student_id")
     if not student_id:
         return RedirectResponse(url="/login", status_code=302)
+
     student = await database.fetch_one(
         "SELECT * FROM students WHERE student_id = :student_id",
         {"student_id": student_id}
     )
     class_id = student["class_id"]
+
     check_query = """
         SELECT ts.id
         FROM teacher_subjects ts
-        INNER JOIN class_subjects cs ON cs.subject_id = ts.subject_id
         WHERE ts.id = :teacher_subject_id
-          AND cs.class_id = :class_id
+          AND ts.class_id = :class_id
     """
     valid = await database.fetch_one(check_query, {"teacher_subject_id": teacher_subject_id, "class_id": class_id})
     if not valid:
         raise HTTPException(status_code=403, detail="You cannot rate this subject")
+
     questions = await database.fetch_all("SELECT * FROM questions ORDER BY question_id ASC")
+
     sub_query = """
         SELECT ts.id AS teacher_subject_id, s.subject_name, t.name AS teacher_name
         FROM teacher_subjects ts
@@ -195,23 +202,27 @@ async def rate_subject(request: Request, teacher_subject_id: int):
         WHERE ts.id = :teacher_subject_id
     """
     subject = await database.fetch_one(sub_query, {"teacher_subject_id": teacher_subject_id})
+
     return templates.TemplateResponse("rate.html", {
         "request": request,
         "questions": questions,
         "subject": subject
     })
 
+# ------------------ Submit Feedback ------------------
 @router.post("/submit-feedback")
 async def submit_feedback(request: Request, teacher_subject_id: int = Form(...)):
     student_id = request.session.get("student_id")
     if not student_id:
         raise HTTPException(status_code=401, detail="Student not logged in")
+
     form = await request.form()
     responses = {}
     for key, value in form.items():
         if key.startswith("responses[") and value:
             qid = int(key.replace("responses[", "").replace("]", ""))
             responses[qid] = int(value)
+
     delete_query = """
         DELETE FROM feedback
         WHERE student_id = :student_id
@@ -221,6 +232,7 @@ async def submit_feedback(request: Request, teacher_subject_id: int = Form(...))
         "student_id": student_id,
         "teacher_subject_id": teacher_subject_id
     })
+
     insert_query = """
         INSERT INTO feedback (student_id, teacher_subject_id, question_id, rating)
         VALUES (:student_id, :teacher_subject_id, :question_id, :rating)
@@ -232,9 +244,11 @@ async def submit_feedback(request: Request, teacher_subject_id: int = Form(...))
             "question_id": qid,
             "rating": rating
         })
+
     return RedirectResponse(url="/module-rating", status_code=303)
 
+# ------------------ Logout ------------------
 @router.get("/logout")
 async def logout(request: Request):
     request.session.pop("student_id", None)
-    return RedirectResponse(url="student/login-form", status_code=302)
+    return RedirectResponse(url="/student/login-form", status_code=302)
